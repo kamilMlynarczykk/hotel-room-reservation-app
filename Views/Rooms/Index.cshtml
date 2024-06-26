@@ -1,0 +1,127 @@
+﻿@using HotelReservationApp.Models
+@model Tuple<IEnumerable<Room>, Reservation>
+
+@{
+    ViewData["Title"] = "Rooms";
+    var startDate = ViewBag.StartDate as string ?? DateTime.Now.ToString("yyyy-MM-dd");
+    var endDate = ViewBag.EndDate as string ?? DateTime.Now.ToString("yyyy-MM-dd");
+}
+
+<p>
+    @if (User.Identity.IsAuthenticated && User.IsInRole("admin"))
+    {
+        <a asp-action="Create" class="btn btn-sm btn-outline-secondary">Dodaj nowy pokój +</a>
+    }
+</p>
+
+<form method="get" asp-controller="Rooms" asp-action="Index">
+    <div>
+        <h4>Wybierz interesujący Cię termin:</h4>
+        <div class="row align-items-center">
+            <div class="col-auto d-flex align-items-center">
+                Od:
+            </div>
+            <div class="col-auto">
+                <input type="date" class="form-control" id="startDate" name="startDate" min="@DateTime.Now.ToString("yyyy-MM-dd")" value="@startDate" />
+            </div>
+            <div class="col-auto d-flex align-items-center">
+                Do:
+            </div>
+            <div class="col-auto">
+                <input type="date" class="form-control" id="endDate" name="endDate" min="@DateTime.Now.ToString("yyyy-MM-dd")" value="@endDate" />
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Filtruj</button>
+                <a type="button" asp-controller="Rooms" asp-action="Index" class="btn btn-secondary" id="clearDatesButton">Wyczyść daty</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="album py-5 bg-light">
+    <div class="container">
+        <div class="row">
+            @if (Model.Item1 != null && Model.Item1.Any())
+            {
+                @foreach (var item in Model.Item1)
+                {
+                    <div class="col-md-4">
+                        <div class="card mb-4 box-shadow">
+                            @if (item.Photo != null && item.Photo.Length > 0)
+                            {
+                                <img class="card-img-left" src="data:image/jpeg;base64,@Convert.ToBase64String(item.Photo)" width="100%" height="250" alt="Room Image">
+                            }
+                            else
+                            {
+                                <!-- Placeholder image or default image -->
+                                <img class="card-img-left" src="https://placehold.jp/250x250.png" width="100%" height="250" alt="Room Image">
+                            }
+                            <div class="card-body">
+                                <p class="card-text">Cena za noc: @item.PricePerNight zł</p>
+                                <p class="card-text">Typ pokoju: @item.RoomType</p>
+                                <p class="card-text">Ilość łóżek: @item.Capacity</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div class="btn-group">
+                                        <a type="button" asp-controller="Rooms" asp-action="Details" asp-route-id="@item.RoomID" class="btn btn-sm btn-outline-secondary">Sprawdź szczegóły</a>
+                                        @if (User.Identity.IsAuthenticated && User.IsInRole("admin"))
+                                        {
+                                            <a type="button" asp-controller="Rooms" asp-action="Edit" asp-route-id="@item.RoomID" class="btn btn-sm btn-outline-secondary">Edytuj</a>
+                                            <a type="button" asp-controller="Rooms" asp-action="Delete" asp-route-id="@item.RoomID" class="btn btn-sm btn-outline-secondary">Usuń</a>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <h2>Wszystkie pokoje dla podanej daty są zarezerwowane! Wpisz inne daty</h2>
+            }
+            <div class="col-md-4">
+                <div class="card mb-4 box-shadow">
+                    @if (User.Identity.IsAuthenticated && User.IsInRole("admin"))
+                    {
+                        <a asp-action="Create" class="btn btn-sm btn-outline-secondary">Dodaj nowy pokój +</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var startDateInput = document.getElementById("startDate");
+            var endDateInput = document.getElementById("endDate");
+
+            // Ensure endDate is higher than startDate
+            startDateInput.addEventListener("change", function () {
+                var startDateValue = new Date(startDateInput.value);
+                var endDateValue = new Date(endDateInput.value);
+
+                if (endDateValue <= startDateValue) {
+                    endDateInput.setCustomValidity("Data końcowa musi być późniejsza niż początkowa.");
+                } else {
+                    endDateInput.setCustomValidity("");
+                }
+            });
+
+            endDateInput.addEventListener("change", function () {
+                var startDateValue = new Date(startDateInput.value);
+                var endDateValue = new Date(endDateInput.value);
+
+                if (endDateValue <= startDateValue) {
+                    endDateInput.setCustomValidity("Data końcowa musi być późniejsza niż początkowa.");
+                } else {
+                    endDateInput.setCustomValidity("");
+                }
+            });
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

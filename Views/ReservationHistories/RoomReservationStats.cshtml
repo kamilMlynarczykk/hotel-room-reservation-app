@@ -1,0 +1,128 @@
+﻿@using HotelReservationApp.Data
+@model RoomReservationStatsViewModel
+
+@{
+    var label = "placeholder";
+
+    if (Model.SelectedYear == 0 && Model.SelectedMonth == 0 && string.IsNullOrEmpty(Model.SelectedRoomNumber))
+    {
+        label = "Ilosc zarezerwowanych dni w roku";
+    }
+    else if (Model.SelectedYear != 0 && Model.SelectedMonth == 0 && string.IsNullOrEmpty(Model.SelectedRoomNumber))
+    {
+        label = $"Ilosc zarezerwowanych dni w roku {Model.SelectedYear}";
+    }
+    else if (Model.SelectedYear == 0 && Model.SelectedMonth != 0 && string.IsNullOrEmpty(Model.SelectedRoomNumber))
+    {
+        label = $"Ilosc zarezerwowanych dni w miesiacu {@MonthsList.MonthList[Model.SelectedMonth-1]}";
+    }
+    else if (Model.SelectedYear == 0 && Model.SelectedMonth == 0 && !string.IsNullOrEmpty(Model.SelectedRoomNumber))
+    {
+        label = $"Ilosc zarezerwowanych dni w pokoju {Model.SelectedRoomNumber}";
+    }
+    else if (Model.SelectedYear != 0 && Model.SelectedMonth != 0 && string.IsNullOrEmpty(Model.SelectedRoomNumber))
+    {
+        label = $"Ilosc zarezerwowanych dni w roku {Model.SelectedYear}, w miesiacu {@MonthsList.MonthList[Model.SelectedMonth-1]}";
+    }
+    else if (Model.SelectedYear != 0 && Model.SelectedMonth == 0 && !string.IsNullOrEmpty(Model.SelectedRoomNumber))
+    {
+        label = $"Ilosc zarezerwowanych dni w roku {Model.SelectedYear}, w pokoju {Model.SelectedRoomNumber}";
+    }
+    else if (Model.SelectedYear == 0 && Model.SelectedMonth != 0 && !string.IsNullOrEmpty(Model.SelectedRoomNumber))
+    {
+        label = $"Ilosc zarezerwowanych dni w miesiacu {@MonthsList.MonthList[Model.SelectedMonth-1]}, w pokoju {Model.SelectedRoomNumber}";
+    }
+    else if (Model.SelectedYear != 0 && Model.SelectedMonth != 0 && !string.IsNullOrEmpty(Model.SelectedRoomNumber))
+    {
+        label = $"Ilosc zarezerwowanych dni w roku {Model.SelectedYear}, w miesiacu {@MonthsList.MonthList[Model.SelectedMonth-1]}, w pokoju {Model.SelectedRoomNumber}";
+    }
+}
+
+<div class="container">
+    <form asp-action="RoomReservationStats" asp-controller="ReservationHistories" method="get">
+        <div class="row">
+            <div class="col-md-4">
+                <label asp-for="SelectedYear">Wybierz rok:</label>
+                <select asp-for="SelectedYear" asp-items="new SelectList(Model.Years, Model.SelectedYear)" class="form-control">
+                    <option value="">Wszystkie lata</option>
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="SelectedMonth">Wybierz miesiąc:</label>
+                <select asp-for="SelectedMonth" class="form-control">
+                    <option value="">Wszystkie miesiące</option>
+                    @for (int i = 0; i < MonthsList.MonthList.Count; i++)
+                    {
+                        <option value="@(i+1)">@MonthsList.MonthList[i]</option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-4">
+                <label asp-for="SelectedRoomNumber">Wyiberz numer pokoju:</label>
+                <select asp-for="SelectedRoomNumber" asp-items="new SelectList(Model.RoomNumbers, Model.SelectedRoomNumber)" class="form-control">
+                    <option value="">Wszystkie pokoje</option>
+                </select>
+            </div>
+
+            <div class="col-md-12 mt-3">
+                <button type="submit" class="btn btn-primary">Zastosuj filtry</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="row mt-3">
+        <div class="col-md-12">
+            @if (ViewBag.ReservationStats != null)
+            {
+                <canvas id="reservationChart" width="800" height="400"></canvas>
+            }
+            else
+            {
+                <p>No data available.</p>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Optional: Move the chart initialization to an external script file
+        document.addEventListener('DOMContentLoaded', function () {
+            var ctx = document.getElementById('reservationChart').getContext('2d');
+            var data = @Html.Raw(Json.Serialize(ViewBag.ReservationStats));
+
+            var labels = data.map(function (d) {
+                return `${d.label}`;
+            });
+
+            var values = data.map(function (d) {
+                return d.value;
+            });
+
+            var chart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '@label',
+                        data: values,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            stepSize: 1
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+}

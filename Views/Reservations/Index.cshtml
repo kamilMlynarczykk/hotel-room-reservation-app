@@ -1,0 +1,257 @@
+﻿@using HotelReservationApp.Data
+@model IEnumerable<Reservation>
+
+@{
+    ViewData["Title"] = "Twoje rezerwacje";
+}
+
+<div class="container mt-4">
+    @if (User.Identity.IsAuthenticated && User.IsInRole("admin"))
+    {
+        <h1 class="text-center">Wszystkie rezerwacje użytkowników</h1>
+        <div class="text-right mb-3">
+            <a class="btn btn-primary" asp-action="Create">Nowa rezerwacja...</a>
+        </div>
+    }
+    else
+    {
+        <h1 class="text-center">@ViewData["Title"]</h1>
+    }
+    <form asp-action="Index" method="get">
+        <div class="form-actions no-color">
+            <p>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Wybierz status</th>
+                            <th>Wybierz sortowanie</th>
+                            @if (User.IsInRole("admin"))
+                            {
+                                <th>Wybierz e-mail</th>
+                            }
+                            <th>Wybierz numer pokoju</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <select class="form-control" id="statusFilter" name="statusFilter">
+                                    <option value="">Wszystkie</option>
+                                    <option value="@StatusPhases.Pending">Oczekujące na zatwierdzenie</option>
+                                    @if (User.IsInRole("admin"))
+                                    {
+                                        <option value="@StatusPhases.Changed">Edytowane przez użytkownika</option>
+                                    }
+                                    <option value="@StatusPhases.Accepted">Zaakceptowane</option>
+                                    <option value="@StatusPhases.Denied">Odrzucone</option>
+                                </select>
+                            </td>
+                            <td>
+                                <select class="form-control" id="sortBy" name="sortBy">
+                                    <option value="">Wybierz sortowanie</option>
+                                    @if (User.IsInRole("admin"))
+                                    {
+                                        <option value="@ReservationSorts.AddedDate_asc">Dada dodania rosnąco</option>
+                                        <option value="@ReservationSorts.AddedDate_desc">Dada dodania malejąco</option>
+                                    }
+                                    <option value="@ReservationSorts.StartDate_asc">Dada zakwaterowania rosnąco</option>
+                                    <option value="@ReservationSorts.StartDate_desc">Dada zakwaterowania malejąco</option>
+                                    <option value="@ReservationSorts.EndDate_asc">Data wykwaterowania rosnąco</option>
+                                    <option value="@ReservationSorts.EndDate_asc">Data wykwaterowania malejąco</option>
+                                </select>
+                            </td>
+                            @if (User.IsInRole("admin"))
+                            {
+                                <td>
+                                    <select class="form-control" id="emailFilter" name="emailFilter">
+                                        <option value="">Wszystkie emaile</option>
+                                        @foreach (var userEmail in ViewBag.UserEmails)
+                                        {
+                                            <option value="@userEmail.Value">@userEmail.Text</option>
+                                        }
+                                    </select>
+                                </td>
+                            }
+                            <td>
+                                <select class="form-control" id="roomFilter" name="roomFilter">
+                                    <option value="">Wszystkie pokoje</option>
+                                    @foreach (var roomNumber in ViewBag.RoomNumbers)
+                                    {
+                                        <option value="@roomNumber.Value">@roomNumber.Text</option>
+                                    }
+                                </select>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="submit" class="btn btn-primary">Zastosuj</button>
+                <button type="button" class="btn btn-secondary" id="clearFilters">Wyczyść filtry</button>
+            </p>
+        </div>
+    </form>
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="card-title">Lista rezerwacji</h4>
+        </div>
+        <div class="card-body">
+            <table class="table">
+                <thead>
+                    <tr>
+                        @if (User.IsInRole("admin"))
+                        {
+                            <th>ID Rezerwacji</th>
+                            <th>Data dodania rezerwacji</th>
+                            <th>E-mail użytkownika</th>
+                        }
+                        <th>Data zakwaterowania</th>
+                        <th>Data wykwaterowania</th>
+                        <th>Numer pokoju</th>
+                        <th>Całkowita kwota</th>
+                        <th>Status rezerwacji</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        var totalDays = (item.EndDate - item.StartDate).TotalDays;
+                        var totalCost = (int)totalDays * item.Room.PricePerNight;
+
+                        <tr>
+                            @if (User.IsInRole("admin"))
+                            {
+                                <td>@Html.DisplayFor(modelItem => item.ReservationID)</td>
+                                <td>@Html.DisplayFor(modelItem => item.AddedDate)</td>
+                                <td>@Html.DisplayFor(modelItem => item.AppUser.Email)</td>
+                            }
+                            <td>@Html.DisplayFor(modelItem => item.StartDate)</td>
+                            <td>@Html.DisplayFor(modelItem => item.EndDate)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Room.RoomNumber)</td>
+                            <td>@totalCost.ToString("C")</td>
+                            <td>
+                                <span class="@(item.Status == StatusPhases.Pending || item.Status == StatusPhases.Changed ? "text-warning" : item.Status == StatusPhases.Accepted ? "text-success" : "text-danger")">
+                                    @if (User.IsInRole("user") && item.Status == StatusPhases.Changed)
+                                    {
+                                        <span>Zmiana trafiła do administracji, poczekaj na zaakceptowanie...</span>
+                                    }
+                                    else
+                                    {
+                                        @Html.DisplayFor(modelItem => item.Status)
+                                    }
+                                </span>
+                            </td>
+                            <td>
+                                <div class="row">
+                                    <div class="col">
+                                        @if (User.Identity.IsAuthenticated && User.IsInRole("admin"))
+                                        {
+                                            <form asp-action="Accept" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@item.ReservationID" />
+                                                <button type="submit" class="btn btn-sm btn-success">Zaakceptuj</button>
+                                            </form>
+                                            <form asp-action="Deny" method="post" class="d-inline">
+                                                <input type="hidden" name="id" value="@item.ReservationID" />
+                                                <button type="submit" class="btn btn-sm btn-danger">Odrzuć</button>
+                                            </form>
+                                            
+                                        }
+                                    </div>
+                                    <div class="col">
+                                        @if (User.Identity.IsAuthenticated && User.IsInRole("admin"))
+                                        {
+                                            <a class="btn btn-sm btn-danger" asp-action="Delete" asp-route-id="@item.ReservationID">Usuń rezerwacje</a>
+                                        }
+                                        <a class="btn btn-sm btn-warning" asp-action="Edit" asp-route-id="@item.ReservationID">Edytuj rezerwacje</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Restore scroll position
+            if (localStorage.getItem("scrollPosition") !== null) {
+                window.scrollTo(0, localStorage.getItem("scrollPosition"));
+                localStorage.removeItem("scrollPosition");
+            }
+
+            // Save scroll position on form submit
+            document.querySelectorAll("form").forEach(function (form) {
+                form.addEventListener("submit", function () {
+                    localStorage.setItem("scrollPosition", window.scrollY);
+                });
+            });
+
+            // Save scroll position on button click
+            document.querySelectorAll("button").forEach(function (button) {
+                button.addEventListener("click", function () {
+                    localStorage.setItem("scrollPosition", window.scrollY);
+                });
+            });
+
+            // Handle filter restoration
+            var statusFilterSelect = document.getElementById("statusFilter");
+            var savedValue = localStorage.getItem("statusFilter");
+            if (savedValue) {
+                statusFilterSelect.value = savedValue;
+            }
+
+            statusFilterSelect.addEventListener("change", function () {
+                localStorage.setItem("statusFilter", statusFilterSelect.value);
+            });
+
+            var emailFilterSelect = document.getElementById("emailFilter");
+            var savedValue1 = localStorage.getItem("emailFilter");
+            if (savedValue1) {
+                emailFilterSelect.value = savedValue1;
+            }
+
+            emailFilterSelect.addEventListener("change", function () {
+                localStorage.setItem("emailFilter", emailFilterSelect.value);
+            });
+
+            var roomFilterSelect = document.getElementById("roomFilter");
+            var savedValue2 = localStorage.getItem("roomFilter");
+            if (savedValue2) {
+                roomFilterSelect.value = savedValue2;
+            }
+
+            roomFilterSelect.addEventListener("change", function () {
+                localStorage.setItem("roomFilter", roomFilterSelect.value);
+            });
+
+            var sortFilterSelect = document.getElementById("sortBy");
+            var savedValue3 = localStorage.getItem("sortBy");
+            if (savedValue3) {
+                sortFilterSelect.value = savedValue3;
+            }
+
+            sortFilterSelect.addEventListener("change", function () {
+                localStorage.setItem("sortBy", sortFilterSelect.value);
+            });
+
+            var clearFiltersBtn = document.getElementById("clearFilters");
+            clearFiltersBtn.addEventListener("click", function () {
+                document.getElementById("statusFilter").value = "";
+                document.getElementById("emailFilter").value = "";
+                document.getElementById("roomFilter").value = "";
+                document.getElementById("sortBy").value = "";
+
+                localStorage.removeItem("statusFilter");
+                localStorage.removeItem("emailFilter");
+                localStorage.removeItem("roomFilter");
+                localStorage.removeItem("sortBy");
+            });
+        });
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

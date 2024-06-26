@@ -1,0 +1,58 @@
+﻿@using System.Security.Claims
+@model RoomReservationViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+
+
+<div class="container">
+    <div class="row justify-content-center">
+        
+        <div class="col-md-6">
+            <form asp-action="Create">
+                <input type="hidden" asp-for="Room.Capacity" value="2" />
+                <input type="hidden" asp-for="Room.RoomType" value="placeholder" />
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <h1 class="text-center">Tworzenie rezerwacji</h1>
+                <div class="form-group">
+                    <label asp-for="Room.RoomNumber" class="control-label">Numer pokoju</label>
+                    <input asp-for="Room.RoomNumber" class="form-control" placeholder=" 1001" />
+                    <span asp-validation-for="Room.RoomNumber" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="AppUser.Email" class="control-label">E-mail klienta</label>
+                    <input asp-for="AppUser.Email" class="form-control" placeholder=" example@email.com" />
+                    <span asp-validation-for="AppUser.Email" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Reservation.StartDate" class="control-label">Data rozpoczęcia rezerwacji</label>
+                    <input asp-for="Reservation.StartDate" class="form-control" id="StartDate" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="Reservation.StartDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label asp-for="Reservation.EndDate" class="control-label">Data końca rezerwacji</label>
+                    <input asp-for="Reservation.EndDate" class="form-control" id="EndDate" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="Reservation.EndDate" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Create" class="btn btn-primary" />
+                    <a asp-action="Index" class="btn btn-primary">Back to List</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById("StartDate").value = today;
+        document.getElementById("EndDate").value = today;
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,94 @@
+﻿@model Room
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1 class="text-center">Nowy pokój</h1>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <input type="hidden" asp-for="IsAvailable" value="True"/>
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Podstawowe informacje</h4>
+            <hr />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="RoomNumber" class="control-label">Numer pokoju</label>
+                <input asp-for="RoomNumber" class="form-control" />
+                <span asp-validation-for="RoomNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RoomType" class="control-label">Typ pokoju</label>
+                <input asp-for="RoomType" class="form-control" />
+                <span asp-validation-for="RoomType" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="PricePerNight" class="control-label">Cena za noc</label>
+                <input asp-for="PricePerNight" class="form-control" />
+                <span asp-validation-for="PricePerNight" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Capacity" class="control-label">Liczba osób</label>
+                <input asp-for="Capacity" class="form-control" />
+                <span asp-validation-for="Capacity" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Wybierz zdjęcie</label>
+                <input type="file" name="Photo" class="form-control" />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <h4>Dodatkowe wyposażenie</h4>
+            <hr />
+            <div class="form-group">
+                <label asp-for="RoomContents.TV" class="control-label">Liczba TV</label>
+                <input asp-for="RoomContents.TV" class="form-control" />
+                <span asp-validation-for="RoomContents.TV" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RoomContents.Chairs" class="control-label">Liczba krzeseł</label>
+                <input asp-for="RoomContents.Chairs" class="form-control" />
+                <span asp-validation-for="RoomContents.Chairs" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RoomContents.Beds" class="control-label">Liczba łóżek</label>
+                <input asp-for="RoomContents.Beds" class="form-control" />
+                <span asp-validation-for="RoomContents.Beds" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RoomContents.Desks" class="control-label">Liczba biurek</label>
+                <input asp-for="RoomContents.Desks" class="form-control" />
+                <span asp-validation-for="RoomContents.Desks" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RoomContents.Balconies" class="control-label">Liczba balkonów</label>
+                <input asp-for="RoomContents.Balconies" class="form-control" />
+                <span asp-validation-for="RoomContents.Balconies" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RoomContents.Fridge" class="control-label">Liczba lodówek</label>
+                <input asp-for="RoomContents.Fridge" class="form-control" />
+                <span asp-validation-for="RoomContents.Fridge" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="RoomContents.Kettle" class="control-label">Liczba czajników</label>
+                <input asp-for="RoomContents.Kettle" class="form-control" />
+                <span asp-validation-for="RoomContents.Kettle" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Create" class="btn btn-primary" />
+    </div>
+</form>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

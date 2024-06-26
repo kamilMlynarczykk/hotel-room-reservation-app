@@ -1,0 +1,113 @@
+﻿@model Room
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1 class="text-center">Edytuj pokój @Model.RoomNumber - @Model.RoomType</h1>
+
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="RoomID" />
+
+    <div class="card">
+        <div class="card-header">
+            <h2>Room @Model.RoomNumber - @Model.RoomType</h2>
+        </div>
+        <div class="card-body">
+            <dl class="row">
+                <dt class="col-sm-2">Price Per Night</dt>
+                <dd class="col-sm-10">
+                    <input asp-for="PricePerNight" class="form-control" />
+                    <span asp-validation-for="PricePerNight" class="text-danger"></span>
+                </dd>
+
+                <dt class="col-sm-2">Capacity</dt>
+                <dd class="col-sm-10">
+                    <input asp-for="Capacity" class="form-control" />
+                    <span asp-validation-for="Capacity" class="text-danger"></span>
+                </dd>
+            </dl>
+
+            <h3>Wyposażenie pokoju</h3>
+            <div class="row">
+                <div class="col-sm-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">Chairs</dt>
+                        <dd class="col-sm-8">
+                            <input asp-for="RoomContents.Chairs" class="form-control" />
+                            <span asp-validation-for="RoomContents.Chairs" class="text-danger"></span>
+                        </dd>
+
+                        <dt class="col-sm-4">Beds</dt>
+                        <dd class="col-sm-8">
+                            <input asp-for="RoomContents.Beds" class="form-control" />
+                            <span asp-validation-for="RoomContents.Beds" class="text-danger"></span>
+                        </dd>
+
+                        <dt class="col-sm-4">Desks</dt>
+                        <dd class="col-sm-8">
+                            <input asp-for="RoomContents.Desks" class="form-control" />
+                            <span asp-validation-for="RoomContents.Desks" class="text-danger"></span>
+                        </dd>
+
+                        <dt class="col-sm-4">Balconies</dt>
+                        <dd class="col-sm-8">
+                            <input asp-for="RoomContents.Balconies" class="form-control" />
+                            <span asp-validation-for="RoomContents.Balconies" class="text-danger"></span>
+                        </dd>
+                    </dl>
+                </div>
+                <div class="col-sm-6">
+                    <dl class="row">
+                        <dt class="col-sm-4">TVs</dt>
+                        <dd class="col-sm-8">
+                            <input asp-for="RoomContents.TV" class="form-control" />
+                            <span asp-validation-for="RoomContents.TV" class="text-danger"></span>
+                        </dd>
+
+                        <dt class="col-sm-4">Fridges</dt>
+                        <dd class="col-sm-8">
+                            <input asp-for="RoomContents.Fridge" class="form-control" />
+                            <span asp-validation-for="RoomContents.Fridge" class="text-danger"></span>
+                        </dd>
+
+                        <dt class="col-sm-4">Kettles</dt>
+                        <dd class="col-sm-8">
+                            <input asp-for="RoomContents.Kettle" class="form-control" />
+                            <span asp-validation-for="RoomContents.Kettle" class="text-danger"></span>
+                        </dd>
+                    </dl>
+                </div>
+            </div>
+
+            <h3>Zdjęcie</h3>
+            <div class="form-group">
+                <br />
+                @if (Model.Photo != null)
+                {
+                    <img src="data:image;base64,@Convert.ToBase64String(Model.Photo)" alt="Room Photo" style="max-width: 250px; max-height: 250px;" />
+                }
+                else
+                {
+                    <p>No photo available</p>
+                }
+            </div>
+            <div class="form-group">
+                <label class="control-label">Zmień zdjęcie</label>
+                <input type="file" name="Photo" class="form-control" />
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

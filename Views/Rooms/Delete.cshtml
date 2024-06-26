@@ -1,0 +1,57 @@
+﻿@model Room
+
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h3>Czy napewno chcesz usunąć pokój?</h3>
+<div>
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+            @* Render the room photo if available *@
+            @if (Model.Photo != null && Model.Photo.Length > 0)
+            {
+                <img src="data:image/jpeg;base64,@(Convert.ToBase64String(Model.Photo))" class="card-img" alt="Room Photo">
+            }
+            else
+            {
+                <img src="https://placehold.jp/250x250.png" class="card-img" alt="Placeholder Image">
+            }
+        </div>
+        <div class="col-md-8">
+            <dl class="row">
+                <dt class="col-sm-2">
+                    Numer pokoju
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.RoomNumber)
+                </dd>
+                <dt class="col-sm-2">
+                    Rodzaj pokoju
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.RoomType)
+                </dd>
+                <dt class="col-sm-2">
+                    Cena za noc
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.PricePerNight)
+                </dd>
+                <dt class="col-sm-2">
+                    Ilość osób
+                </dt>
+                <dd class="col-sm-10">
+                    @Html.DisplayFor(model => model.Capacity)
+                </dd>
+            </dl>
+        </div>
+    </div>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="RoomID" />
+        <input type="submit" value="Usuń" class="btn btn-danger" /> |
+        <a asp-action="Index" class="btn btn-secondary">Powrót do listy</a>
+    </form>
+</div>
