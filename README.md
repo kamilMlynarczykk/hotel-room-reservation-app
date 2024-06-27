@@ -9,7 +9,7 @@
 ## Roles
 
 1. User has ability to:
-- register and sign up
+- register and log in
 - choose the reservation date of his interest
 - see details of the room
 - make a reservation
